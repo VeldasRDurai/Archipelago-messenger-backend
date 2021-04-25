@@ -1,24 +1,41 @@
-var createError = require('http-errors');
-var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
-var logger = require('morgan');
-
-var indexRouter = require('./routes/index');
+const createError = require('http-errors');
+const express = require('express');
+const path = require('path');
+const cookieParser = require('cookie-parser');
+const logger = require('morgan');
+const cors = require('cors');
+const mongoose = require("mongoose");
 
 var app = express();
 
-// view engine setup
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'jade');
+mongoose.connect( "mongodb://localhost:27017/" + "pesalama" , 
+{ useNewUrlParser:true , useUnifiedTopology: true} );
+
+const accountSchema = new mongoose.Schema ({
+  email : { type : String , required: [ true , " No email specified...!"     ] },
+  name  : { type : String , required: [ true , " No name specified...!"     ] },
+  password : { type : String },
+  refreshToken : { type : String } ,
+});
+const users   = mongoose.model( "Users" , accountSchema );
 
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
+app.use(cors( { origin : "http://localhost:3000" , credentials : true } )); 
+
+const indexRouter = require('./routes/index');
+const logInRouter = require('./routes/log-in');
+const signUpRouter = require('./routes/sign-up');
+
+app.use('/log-in' ,express.static(path.join(__dirname, 'public')));
+app.use('/sign-up',express.static(path.join(__dirname, 'public')));
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', indexRouter);
+app.use('/log-in',logInRouter({ users : users}));
+app.use('/sign-up',signUpRouter({ users: users}));
+app.use('/', indexRouter({ users : users}));
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

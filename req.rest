@@ -1,0 +1,22 @@
+
+GET http://localhost:4000/
+
+###
+POST http://localhost:4000/sign-up
+Content-Type: application/json
+
+{
+    "email": "das",
+    "name" : "das" ,
+    "password": "das"
+}
+###
+POST http://localhost:4000/log-in
+Content-Type: application/json
+
+{
+    "email": "veldasrdurai72@gmail.com", 
+    "password": "daseqw312"
+}
+
+###
