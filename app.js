@@ -83,7 +83,7 @@ io.on('connection' , async ( socket ) => {
   })
   socket.on( 'search', async ( data ) => { 
     try{
-      const userlist = await users.find({ 'email' : new RegExp( data.searchText ,"i") } , [ "email" ] , {limit:25} );
+      const userlist = await users.find({ 'email' : new RegExp( data.searchText ,"i") } , [ 'email' , 'name' ] , {limit:25} );
       socket.emit('searchResult' , userlist);
     } catch(e){
       console.log(e);
