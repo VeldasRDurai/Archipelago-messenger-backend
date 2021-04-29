@@ -1,15 +1,15 @@
 var express = require('express');
 var router = express.Router();
 
-module.exports = ( { users } ) => {
+module.exports = ({ users }) => {
 
   const authenticationRouter = require("./authentication");
   router.use('/' , authenticationRouter({users:users}));
 
-  router.get('/', function(req, res, next) {
-    // let x = req.cookies['accessToken'];
-    // res.send("<h1> HOME PAGE </h1>" + "<h3>" + x + "</h3>");
-    res.json( { email : req.email } );
+  router.get('/', async (req, res, next) => {
+    const user = await users.findOne({ email : req.email } , ['email','name']);
+    console.log( user );
+    res.json({ email:user.email, name:user.name });
   });
 
 

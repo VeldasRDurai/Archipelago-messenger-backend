@@ -93,16 +93,16 @@ io.on('connection' , async ( socket ) => {
     try{
       console.log("create room");
       console.log( socket.rooms );
-      let names = [ data.userData.email , data.with ].sort();
+      let names = [ data.email , data.with ].sort();
       ![...socket.rooms].includes(names[0] + names[1]) && socket.join( names[0] + names[1] ) && console.log('joined-room');
       const chatDB = await new mongoose.model( names[0] + names[1] , chatSchema , names[0] + names[1] );
       let ack1 = await chatDB.updateMany( {'sendBy':data.with ,'read':false} , {'read':true} );
       console.log( '1' , ack1 );
-      let ack2 = await users.updateOne({'email': data.userData.email , 'history.email':data.with } , 
+      let ack2 = await users.updateOne({'email': data.email , 'history.email':data.with } , 
           { $set : { 'history.$.unRead': 0 }} );
       console.log( '2' , ack2 );
-      const allChat = await chatDB.find();
-      socket.emit('previousMsg' , allChat );
+      const oldChat = await chatDB.find();
+      socket.emit('previousMsg' , { oldChat:oldChat } );
 
       console.log( socket.rooms );
       // const activeUsersList = await activeUsers.find({ email : data.with });
@@ -124,28 +124,28 @@ io.on('connection' , async ( socket ) => {
     try {
       console.log('sendMsg');
       console.log(data);
-      const names = [ data.userData.email , data.with ].sort();
+      const names = [ data.email , data.with ].sort();
       const chatDB = await new mongoose.model( names[0] + names[1] , chatSchema , names[0] + names[1] );
-      const info = { sendBy:data.userData.email , msg:data.message , msgTime:new Date() };
+      const info = { sendBy:data.email , msg:data.message , msgTime:new Date() };
       await chatDB( info ).save();
   
-      const sender = await users.findOne({ email : data.userData.email });
+      const sender = await users.findOne({ email : data.email });
         if (!(sender.history.some( item => item.email === data.with ) )) {
             console.log("reached2...");
-            let ack3 = await users.updateOne( { 'email' : data.userData.email } , 
-                { $push : {  history : { 'email':data.with  , 'lastMsg':info.msg , 'lastMsgTime':info.msgTime , 'lastSendBy':data.userData.email } } } );
+            let ack3 = await users.updateOne( { 'email' : data.email } , 
+                { $push : {  history : { 'email':data.with  , 'lastMsg':info.msg , 'lastMsgTime':info.msgTime , 'lastSendBy':data.email } } } );
             console.log( '3' , ack3);
             let ack4 = await users.updateOne( { 'email' : data.with } , 
-                { $push : {  history : { 'email':data.userData.email  , 'lastMsg':info.msg , 'lastMsgTime':info.msgTime , 'lastSendBy': data.with , unRead : 1  } } } );
+                { $push : {  history : { 'email':data.email  , 'lastMsg':info.msg , 'lastMsgTime':info.msgTime , 'lastSendBy': data.with , unRead : 1  } } } );
             console.log( '4' , ack4);
         } else {
-          let ack5 = await users.updateOne( {'email': data.userData.email , 'history.email':data.with } , 
-                { $set : { 'history.$.lastMsg':info.msg , 'history.$.lastMsgTime':info.msgTime , 'history.$.lastSendBy':data.userData.email  } } );
+          let ack5 = await users.updateOne( {'email': data.email , 'history.email':data.with } , 
+                { $set : { 'history.$.lastMsg':info.msg , 'history.$.lastMsgTime':info.msgTime , 'history.$.lastSendBy':data.email  } } );
           console.log( '5' , ack5 );
-          const user = await users.findOne( {'email':data.with  , 'history.email':data.userData.email } );
-          const prevUnRead = user.history.find( item => item.email === data.userData.email ).unRead;
-          let ack6 = await users.updateOne( {'email':data.with  , 'history.email':data.userData.email } , 
-              { $set : { 'history.$.lastMsg':info.msg , 'history.$.lastMsgTime':info.msgTime , 'history.$.lastSendBy':data.userData.email , 'history.$.unRead':prevUnRead + 1 } } );
+          const user = await users.findOne( {'email':data.with  , 'history.email':data.email } );
+          const prevUnRead = user.history.find( item => item.email === data.email ).unRead;
+          let ack6 = await users.updateOne( {'email':data.with  , 'history.email':data.email } , 
+              { $set : { 'history.$.lastMsg':info.msg , 'history.$.lastMsgTime':info.msgTime , 'history.$.lastSendBy':data.email , 'history.$.unRead':prevUnRead + 1 } } );
           console.log( '6' , ack6 );
         }
 
@@ -165,6 +165,19 @@ io.on('connection' , async ( socket ) => {
     } catch (e) {
       console.log(e);
     }
+  });
+  socket.on( 'watchedMsg' , async (data) => {
+    try{
+      let names = [ data.email , data.with ].sort();
+      const chatDB = await new mongoose.model( names[0] + names[1] , chatSchema , names[0] + names[1] );
+      let ack1 = await chatDB.updateMany( {'sendBy':data.with ,'read':false} , {'read':true} );
+      console.log( '7' , ack1 );
+      let ack2 = await users.updateOne({'email': data.email , 'history.email':data.with } , 
+          { $set : { 'history.$.unRead': 0 }} );
+      console.log( '8' , ack2 );
+    } catch(e){
+      console.log(e);
+    } 
   });
   socket.on( 'disconnect' , async () => {
     try {
