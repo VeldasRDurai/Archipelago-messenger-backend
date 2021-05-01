@@ -7,37 +7,78 @@ const sendMessage = async ({ data, socket }) => {
     try {
         console.log('send message');
         console.log(data);
-        const names = [ data.email , data.with ].sort();
-        const chatDB = await new mongoose.model( names[0] + names[1] , chatSchema , names[0] + names[1] );
-        const info = { sendBy:data.email , msg:data.message , msgTime:new Date() };
-        await chatDB( info ).save();
-    
-        const sender = await users.findOne({ email : data.email });
-        if (!(sender.history.some( item => item.email === data.with ) )) {
-            console.log("reached2...");
-            let ack3 = await users.updateOne( { 'email' : data.email } , 
-                { $push : {  history : { 'email':data.with  , 'lastMsg':info.msg , 'lastMsgTime':info.msgTime , 'lastSendBy':data.email } } } );
-            console.log( '3' , ack3);
-            let ack4 = await users.updateOne( { 'email' : data.with } , 
-                { $push : {  history : { 'email':data.email  , 'lastMsg':info.msg , 'lastMsgTime':info.msgTime , 'lastSendBy': data.with , unRead : 1  } } } );
-            console.log( '4' , ack4);
+        const { email, name, _id, chattingWithEmail, chattingWithName, chattingWithId, message } = data;
+        const currentTime = new Date();
+        const sortedId = [ _id, chattingWithId ].sort();
+        
+        const chatDB = await new mongoose.model( `${sortedId[0]}chats${sortedId[1]}`, chatSchema,`${sortedId[0]}chats${sortedId[1]}` );
+        const ack1 = await chatDB({ 'sendBy':email , 'message':message , 'messageTime':currentTime }).save();
+        
+        
+        const oldChat = await chatDB.find();       // our chat with new message 
+        socket.emit('previous-message',{ oldChat });
+        
+        const myHistoryDB = await new mongoose.model(`history${_id}`, historySchema, `history${_id}`);
+        const hisHistoryDB = await new mongoose.model(`history${chattingWithId}`, historySchema, `history${chattingWithId}`);
+        const myHistory = await myHistoryDB.findOne({'email':chattingWithEmail});
+        
+        // cheaking weather I have a history of him ; 
+        // There is no need for checking weather he has a history of mine ; since both are created concurrently
+        if(!myHistory){ 
+            const ack3 = await myHistoryDB({ 
+                'email':chattingWithEmail, 
+                'name':chattingWithName, 
+                'id':chattingWithId,
+                'lastSendBy':email,
+                'lastMessage':message,
+                'lastMessageTime':currentTime,
+            }).save();
+            const ack4 = await hisHistoryDB({
+                'email':email, 
+                'name':name, 
+                'id':id,
+                'lastSendBy':email,
+                'lastMessage':message,
+                'lastMessageTime':currentTime,
+            }).save();
         } else {
-          let ack5 = await users.updateOne( {'email': data.email , 'history.email':data.with } , 
-                { $set : { 'history.$.lastMsg':info.msg , 'history.$.lastMsgTime':info.msgTime , 'history.$.lastSendBy':data.email  } } );
-          console.log( '5' , ack5 );
-          const user = await users.findOne( {'email':data.with  , 'history.email':data.email } );
-          const prevUnRead = user.history.find( item => item.email === data.email ).unRead;
-          let ack6 = await users.updateOne( {'email':data.with  , 'history.email':data.email } , 
-              { $set : { 'history.$.lastMsg':info.msg , 'history.$.lastMsgTime':info.msgTime , 'history.$.lastSendBy':data.email , 'history.$.unRead':prevUnRead + 1 } } );
-          console.log( '6' , ack6 );
+            const ack5 = await myHistoryDB.updateOne({'email':chattingWithEmail},{
+                'lastSendBy':email,
+                'lastMessage':message,
+                'lastMessageTime':currentTime,
+                'lastDelivered':false,
+                'lastReaded':false,
+            });
+            const hisCurrentUnRead = await hisHistoryDB.findOne({'email':email}).unRead;
+            const ack6 = await hisHistoryDB.updateOne({'email':email},{
+                'lastSendBy':email,
+                'lastMessage':message,
+                'lastMessageTime':currentTime,
+                'lastDelivered':false,
+                'lastReaded':false,
+                'unRead': hisCurrentUnRead + 1
+            })
         }
-
-        const activeUsersList = await activeUsers.find({ email : data.with });
-        console.log( 'activeUsersList' , activeUsersList );
-        activeUsersList.forEach( item  => {
-            socket.broadcast.to(item.socketId).emit("reciveMsg",{ ...info });
+        
+        const history = await hisHistoryDB.find(); // his changed history   
+        
+        const activeUser = await activeUsers.find({ 'email':chattingWithEmail });
+        activeUser.forEach( async (item) => {
+            if (item.isChatting && item.chattingWithEmail === email){ 
+                // finding weather he is chatting with me
+                const ack7 = await chatDB.updateMany({'sendBy':email, 'delivered':false}, {'delivered':true,'readed':true});
+                socket.broadcast.to(item.socketId).emit('previous-message', { oldChat });
+            } else {
+                //finding weather he is online
+                const ack8 = await chatDB.updateMany({'sendBy':email, 'delivered':false}, {'delivered':true});
+                socket.broadcast.to(item.socketId).emit('set-history', { history });
+            } 
         });
-      } catch (e) {
+
+        const oldChat = await chatDB.find();       // our chat with updated status 
+        socket.emit('previous-message',{ oldChat });
+        
+    } catch (e) {
         console.log(e);
       }
 }

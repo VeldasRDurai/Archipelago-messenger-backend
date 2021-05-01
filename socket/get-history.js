@@ -1,4 +1,5 @@
 const { users } = require('../database/database');
+const { historySchema } = require('../database/history-schema');
 
 const getHistory = async ({ data, socket }) => {
     try{

@@ -1,3 +1,4 @@
+
 const { newUser } =     require('./new-user');
 const { getHistory } =  require('./get-history');
 const { search } =      require('./search');
@@ -6,8 +7,8 @@ const { sendMessage } = require('./send-message');
 const { disconnect } =  require('./disconnect');
 
 module.exports = (io) => {
-    io.on('connection' , async ( socket ) => {
-      console.log( 'user connected' , socket.id );
+    io.on('connection' , socket => {
+      console.log('user connected', socket.id);
       socket.emit('connected');
       socket.on('new-user', data => newUser({ data, socket }) );
       socket.on('get-history', data => getHistory({ data, socket }) );
@@ -17,3 +18,18 @@ module.exports = (io) => {
       socket.on( 'disconnect' , () => disconnect({ socket }) );
     });
 }
+// const socketProvider = (io) => {
+//     return new Promise((resolve, reject) => {
+//         try{
+//             io.on('connection' , socket => {
+//                 console.log( 'user connected' , socket.id );
+//                 socket.emit('connected');
+//                 resolve(socket);
+//             })
+//         } catch(e) {
+//             reject(e);
+//         }     
+//     })
+// }
+
+// module.exports = { socketProvider }

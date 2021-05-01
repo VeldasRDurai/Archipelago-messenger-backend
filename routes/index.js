@@ -8,9 +8,10 @@ const authenticationRouter = require("./authentication");
 router.use('/' , authenticationRouter);
 
 router.get('/', async (req, res, next) => {
-  const user = await users.findOne({ email : req.email } , ['email','name']);
-  console.log( user );
-  res.json({ email:user.email, name:user.name });
+  const { email , name , _id } = await users.findOne({ email : req.email } , ['email','name','_id']);
+
+  console.log( 'email : ', email, ' name : ', name, '_id : ' , _id );
+  res.json({ email , name , _id });
 });
 
 module.exports = router;
