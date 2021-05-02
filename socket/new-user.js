@@ -1,3 +1,5 @@
+const mongoose = require("mongoose");
+
 const { users, activeUsers } = require('../database/database');
 const { historySchema } = require('../database/history-schema');
 const { chatSchema } = require('../database/chat-schema');
@@ -7,16 +9,13 @@ const newUser = async ({ data, socket }) => {
   try {
     console.log(data);
     const { email, name, _id } = data;
-    const myHistoryDB = await new mongoose.model(`history${_id}`, historySchema, `history${_id}`);
+    console.log('my _id : ' , _id);
+    const myHistoryDB = new mongoose.model(`history${_id}`, historySchema, `history${_id}`);
     
-    // adding me to list of active users
-    const ack1 = await activeUsers({ email, name, socketId:socket.id }).save();
-    console.log('Added to active user : ', ack1); 
-
     // changing the not sented messages to delivered status in my history
     const ack3 = await myHistoryDB.updateMany({'unRead': { $ne:0 } }, {lastDelivered: true });
     console.log('All pending messages delivered : ', ack3);
-
+    
     // obtaining my history
     const history = await myHistoryDB.find();
     socket.emit('set-history', { history });
@@ -25,16 +24,33 @@ const newUser = async ({ data, socket }) => {
     const ack2 = await users.updateOne({'email': email },{ 'online':true });
     console.log('Become online : ', ack2);
 
+    const activeUser = await activeUsers.find({ 'email':email });
+    // if no of active users in my name is zero 
+    if(!activeUser.length) {
+      //updating my user status to online
+      const ack2 = await users.updateOne({'email':email},{'online':true});
+      // getting the list of all users chatting currently with me
+      const watching = await activeUsers.find({'chattingWithEmail':email});
+      watching.forEach( item => {
+        // bradcasting to them that I'm going offline
+        socket.broadcast.to(item.socketId).emit('he-is-online');
+      });
+    }
+    
+    // adding me to list of active users
+    const ack1 = await activeUsers({ 'email':email, 'name':name, 'id':_id, 'socketId':socket.id }).save();
+    console.log('Added to active user : ', ack1); 
+    
     const historyUsers = await myHistoryDB.find({'unRead': { $ne:0 } });
-    historyUsers.forEach( item => {
+    historyUsers.forEach( async (item) => {
       const sortedId = [ _id, item.id ].sort();
 
       //changing his messages to delivered in common database collection
-      const chatDB = await new mongoose.model( `${sortedId[0]}chats${sortedId[1]}`, chatSchema,`${sortedId[0]}chats${sortedId[1]}` );
+      const chatDB = new mongoose.model( `chats${sortedId[0]}chats${sortedId[1]}`, chatSchema,`chats${sortedId[0]}chats${sortedId[1]}` );
       await chatDB.updateMany({'sendBy':item.email,'delivered':false}, {'delivered':true});
       
       //changing his history last message to delivered
-      const hisHistoryDB = await new mongoose.model(`history${item.id}`, historySchema, `history${item.id}`);
+      const hisHistoryDB = new mongoose.model(`history${item.id}`, historySchema, `history${item.id}`);
       await hisHistoryDB.updateOne({'email':email}, {lastDelivered: true });
       
       const oldChat = await chatDB.find();
@@ -51,7 +67,7 @@ const newUser = async ({ data, socket }) => {
     });
 
     // updating my activity
-    // const myActivityDB = await new mongoose.model(`activity${_id}`, activitySchema, `activity${_id}`);
+    // const myActivityDB = new mongoose.model(`activity${_id}`, activitySchema, `activity${_id}`);
     // await myActivityDB({ 'time': new Date(), 'activity':'You loged in' }).save();
   
   } catch (e) { console.log(e); }

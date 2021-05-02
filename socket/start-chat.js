@@ -1,35 +1,48 @@
 const mongoose = require("mongoose");
 
-const { activeUsers } = require('../database/database');
+const { users, activeUsers } = require('../database/database');
 const { chatSchema } = require('../database/chat-schema');
 const { historySchema } = require('../database/history-schema');
-const { watchingSchema } = require('../database/watching-schema');
+// const { watchingSchema } = require('../database/watching-schema');
 // const { activitySchema } = require('../database/activity-schema');
 
 const startChat = async ({ data, socket }) => {
   try {
     const { email, name, _id, chattingWithEmail, chattingWithName, chattingWithId } = data;
+    // console.log('data : ', data);
     const sortedId = [ _id, chattingWithId ].sort();
+    // console.log( 'sorted id in start chat : ', sortedId );
 
     // changed all his messages as read which is not readed yet
-    const chatDB = await new mongoose.model( `${sortedId[0]}chats${sortedId[1]}`, chatSchema,`${sortedId[0]}chats${sortedId[1]}` );
-    let ack1 = await chatDB.updateMany( {'sendBy':chattingWithEmail ,'read':false} , {'read':true} );
-    console.log( '1' , ack1 );
+    const chatDB = new mongoose.model( `chats${sortedId[0]}chats${sortedId[1]}`, chatSchema,`chats${sortedId[0]}chats${sortedId[1]}` );
+    let ack0 = await chatDB.find( {'sendBy':chattingWithEmail ,'readed':false});
+    console.log('not readed msgs', ack0);
+    let ack1 = await chatDB.updateMany( {'sendBy':chattingWithEmail ,'readed':false} , {'readed':true} );
+    console.log( 'changed all his messages as read' , ack1 );
 
     // changed my history unread no to 0 ( iff the last message was sent by him )
-    const myHistoryDB = await new mongoose.model(`history${_id}`, historySchema, `history${_id}`);
+    const myHistoryDB = new mongoose.model(`history${_id}`, historySchema, `history${_id}`);
     const ack2 = await myHistoryDB.updateOne({'email':chattingWithEmail, 'lastSendBy':chattingWithEmail}, 
       {'unRead':0 });
+    console.log('changed my history unread no to 0', ack2 );
 
     // changed his history lastReaded to true ( iff the last message was sent by me )
-    const hisHistoryDB = await new mongoose.model(`history${chattingWithId}`, historySchema, `history${chattingWithId}`);
+    const hisHistoryDB = new mongoose.model(`history${chattingWithId}`, historySchema, `history${chattingWithId}`);
     const ack3 = await hisHistoryDB.updateOne({'email':email, 'lastSendBy':chattingWithEmail},
       {'lastReaded': true });
+    console.log('changed his history lastReaded to true', ack3);
 
     const oldChat = await chatDB.find();       // our changed chat
     const history = await hisHistoryDB.find(); // his changed history   
     socket.emit('previous-message',{ oldChat });
     const activeUser = await activeUsers.find({ 'email':chattingWithEmail });
+    console.log('active users : ', activeUser );
+    if(activeUser.length) { // when no of active users in his name is not 0 
+      socket.emit('he-is-online');
+    } else {
+      const { lastSeen } = await users.findOne({'email':chattingWithEmail});
+      socket.emit('he-is-offline', { lastSeen });
+    }
     activeUser.forEach( item => {
       if (item.isChatting && item.chattingWithEmail === email){ 
         // finding weather he is chatting with me
@@ -41,19 +54,20 @@ const startChat = async ({ data, socket }) => {
     });
     
     // changing my active user details
-    const ack4 = await activeUser.updateOne( {'email':email } , {
+    const ack4 = await activeUsers.updateOne( {'email':email } , {
       'isChatting': true,
       'chattingWithEmail' : chattingWithEmail,
       'chattingWithName' : chattingWithName,
       'chattingWithId' : chattingWithId
     });
+    console.log('changing my active user details', ack4 );
 
     // changing his wathching schema details
-    const watchingDB = await new mongoose.model(`watching${_id}`, watchingSchema, `watching${_id}`);
-    const ack5 = await watchingDB({ email: chattingWithEmail, name: chattingWithName, id:chattingWithId }).save();
+    // const watchingDB = new mongoose.model(`watching${chattingWithId}`, watchingSchema, `watching${chattingWithId}`);
+    // const ack5 = await watchingDB({ 'email':email, 'name': name, 'id':_id, 'socketId':socket.id }).save();
 
     // updating my activity
-    // const myActivityDB = await new mongoose.model(`activity${_id}`, activitySchema, `activity${_id}`);
+    // const myActivityDB = new mongoose.model(`activity${_id}`, activitySchema, `activity${_id}`);
     // await myActivityDB({ 'time': new Date(), 'activity': `Started staring at ${chattingWithName}`  }).save();
     
   } catch(e){

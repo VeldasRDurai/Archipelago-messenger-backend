@@ -1,3 +1,5 @@
+const mongoose = require("mongoose");
+
 const { users } = require('../database/database');
 
 const search = async ({ data, socket }) => {

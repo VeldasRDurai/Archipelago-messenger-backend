@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const { accountSchema } = require('./account-schema');
 const { activeUsersSchema } = require('./active-users-schema');
 
-mongoose.connect( "mongodb://localhost:27017/" + "pesalama" , 
+mongoose.connect( "mongodb://localhost:27017/" + "archipelago" , 
     { useNewUrlParser:true , useUnifiedTopology: true} );
 
 const users = mongoose.model( 'Users' , accountSchema );
