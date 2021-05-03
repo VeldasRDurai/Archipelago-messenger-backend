@@ -8,7 +8,8 @@ const activeUsersSchema = new mongoose.Schema({
     isChatting : { type : Boolean, default:false },
     chattingWithEmail : { type : String },
     chattingWithName : { type : String },
-    chattingWithId : { type : String }
+    chattingWithId : { type : String },
+    isTyping : { type : Boolean, default:false }
 });
 
 module.exports = { activeUsersSchema };

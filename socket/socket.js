@@ -6,6 +6,7 @@ const { endChat } =     require('./end-chat');
 const { disconnect } =  require('./disconnect');
 
 const { search } =      require('./search');
+const { typing } =      require('./typing');
 const { getHistory } =  require('./get-history');
 
 module.exports = (io) => {
@@ -19,6 +20,7 @@ module.exports = (io) => {
       socket.on( 'disconnect' , () => disconnect({ socket }) );
 
       socket.on('search', data => search({ data, socket }) );
+      socket.on('typing' , data => typing({ data, socket }) );
       socket.on('get-history', data => getHistory({ data, socket }) );
     });
 }

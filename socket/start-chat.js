@@ -47,6 +47,9 @@ const startChat = async ({ data, socket }) => {
       if (item.isChatting && item.chattingWithEmail === email){ 
         // finding weather he is chatting with me
         socket.broadcast.to(item.socketId).emit('previous-message', { oldChat });
+        if ( item.isTyping ){
+          socket.emit('toggle-typing', { isTyping:true });
+        }
       } else {
         //finding weather he is online
         socket.broadcast.to(item.socketId).emit('set-history', { history });
