@@ -20,15 +20,18 @@ app.use(cookieParser());
 app.use(cors( { origin : "http://localhost:3000" , credentials : true } )); 
 
 const indexRouter = require('./routes/index');
+const signInRouter = require('./routes/sign-in');
 const logInRouter = require('./routes/log-in');
 const signUpRouter = require('./routes/sign-up');
 
 app.use('/log-in' ,express.static(path.join(__dirname, 'public')));
 app.use('/sign-up',express.static(path.join(__dirname, 'public')));
+app.use('/sign-in',express.static(path.join(__dirname, 'public')));
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/log-in',logInRouter);
 app.use('/sign-up',signUpRouter);
+app.use('/sign-in',signInRouter);
 app.use('/', indexRouter);
 
 // catch 404 and forward to error handler

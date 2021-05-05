@@ -4,6 +4,7 @@ const historySchema = new mongoose.Schema({
     email: { type : String ,  required: [ true , " No email specified...!"  ] },
     name : { type : String ,  required: [ true , " No name specified...!"  ] },
     id : { type : String ,  required: [ true , " No id specified...!"  ] },
+    picture : { type : String },
     lastSendBy : { type : String ,  required: [ true , " No sendBy specified...!"  ] } ,
     lastMessage : { type : String ,  required: [ true , " No msg specified...!"   ] },
     lastMessageTime : { type : Date ,required: [ true , " No date specified...!"  ] },

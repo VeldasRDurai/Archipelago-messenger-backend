@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const { activeUsers } = require('../database/database');
+const { users, activeUsers } = require('../database/database');
 const { chatSchema } = require('../database/chat-schema');
 const { historySchema } = require('../database/history-schema');
 
@@ -26,10 +26,12 @@ const sendMessage = async ({ data, socket }) => {
         if(!myHistory){ 
             // cheaking weather I have a history of him ; 
             // There is no need for checking weather he has a history of mine ; since both are created concurrently
+            const hisDetails = await users.findOne({ 'email':chattingWithEmail });
             const ack3 = await myHistoryDB({ 'email':chattingWithEmail, 'name':chattingWithName, 'id':chattingWithId,
-                'lastSendBy':email, 'lastMessage':message, 'lastMessageTime':currentTime }).save();
+                'picture':hisDetails.picture, 'lastSendBy':email, 'lastMessage':message, 'lastMessageTime':currentTime }).save();
+            const myDetails = await users.findOne({ 'email':email });
             const ack4 = await hisHistoryDB({ 'email':email, 'name':name, 'id':_id,
-                'lastSendBy':email, 'lastMessage':message, 'lastMessageTime':currentTime, 'unRead':1 }).save();
+                'picture':myDetails.picture, 'lastSendBy':email, 'lastMessage':message, 'lastMessageTime':currentTime, 'unRead':1 }).save();
         } else {
             const ack5 = await myHistoryDB.updateOne({'email':chattingWithEmail},
                 {'lastSendBy':email, 'lastMessage':message, 'lastMessageTime':currentTime, 'lastDelivered':false, 'lastReaded':false });
