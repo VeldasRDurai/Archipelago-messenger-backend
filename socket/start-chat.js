@@ -40,7 +40,8 @@ const startChat = async ({ data, socket }) => {
     if(activeUser.length) { // when no of active users in his name is not 0 
       socket.emit('he-is-online');
     } else {
-      const { lastSeen } = await users.findOne({'email':chattingWithEmail});
+      const details = await users.findOne({'email':chattingWithEmail});
+      const { lastSeen } = details;
       socket.emit('he-is-offline', { lastSeen });
     }
     activeUser.forEach( item => {

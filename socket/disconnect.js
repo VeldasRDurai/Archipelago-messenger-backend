@@ -5,7 +5,8 @@ const { users, activeUsers } = require('../database/database');
 
 const disconnect = async ({ socket }) => {
     try {
-        const { email, name, id } = await activeUsers.findOne({'socketId':socket.id});
+        const details = await activeUsers.findOne({'socketId':socket.id});
+        const { email, name, id } = details;
         console.log( email, name, '\nuser disconnected : ' , socket.id );
         const lastSeen = new Date();
 

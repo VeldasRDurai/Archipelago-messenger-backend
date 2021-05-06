@@ -6,7 +6,7 @@ const search = async ({ data, socket }) => {
   try{
       const { searchText } = data;
       const userlist = await users.find({ 'email' : new RegExp( searchText ,"i") }, 
-        [ 'email', 'name', '_id', 'picture' ], 
+        [ 'email', 'name', '_id', 'picture', 'about' ], 
         {limit:25} 
       );
       socket.emit('search-result' , userlist);

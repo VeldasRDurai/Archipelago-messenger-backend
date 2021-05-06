@@ -28,16 +28,18 @@ const sendMessage = async ({ data, socket }) => {
             // There is no need for checking weather he has a history of mine ; since both are created concurrently
             const hisDetails = await users.findOne({ 'email':chattingWithEmail });
             const ack3 = await myHistoryDB({ 'email':chattingWithEmail, 'name':chattingWithName, 'id':chattingWithId,
-                'picture':hisDetails.picture, 'lastSendBy':email, 'lastMessage':message, 'lastMessageTime':currentTime }).save();
+                'picture':hisDetails.picture, 'about':hisDetails.about,
+                'lastSendBy':email, 'lastMessage':message, 'lastMessageTime':currentTime }).save();
             const myDetails = await users.findOne({ 'email':email });
             const ack4 = await hisHistoryDB({ 'email':email, 'name':name, 'id':_id,
-                'picture':myDetails.picture, 'lastSendBy':email, 'lastMessage':message, 'lastMessageTime':currentTime, 'unRead':1 }).save();
+                'picture':myDetails.picture, 'about':myDetails.about, 
+                'lastSendBy':email, 'lastMessage':message, 'lastMessageTime':currentTime, 'unRead':1 }).save();
         } else {
             const ack5 = await myHistoryDB.updateOne({'email':chattingWithEmail},
                 {'lastSendBy':email, 'lastMessage':message, 'lastMessageTime':currentTime, 'lastDelivered':false, 'lastReaded':false });
-            const { unRead } = await hisHistoryDB.findOne({'email':email});
+            const hisHistory = await hisHistoryDB.findOne({'email':email});
             const ack6 = await hisHistoryDB.updateOne({'email':email},
-                {'lastSendBy':email, 'lastMessage':message, 'lastMessageTime':currentTime, 'lastDelivered':false, 'lastReaded':false, 'unRead': Number(unRead) + 1 });
+                {'lastSendBy':email, 'lastMessage':message, 'lastMessageTime':currentTime, 'lastDelivered':false, 'lastReaded':false, 'unRead': Number(hisHistory.unRead) + 1 });
         }
         
         const activeUser = await activeUsers.find({ 'email':chattingWithEmail });

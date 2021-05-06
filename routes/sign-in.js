@@ -1,4 +1,5 @@
 const express = require("express");
+const jwt     = require("jsonwebtoken");
 const router  = express.Router();
 
 const { users } = require('../database/database');
@@ -19,10 +20,20 @@ router.post( '/', async (req, res, next) => {
                 'givenName' : payload.given_name,
                 'familyName' : payload.family_name
             }).save();
+        } else {
+            const ack1 = await users.updateOne({ 'email' : payload.email },{
+                'name' : payload.name, 
+                'picture' : payload.picture, 
+                'givenName' : payload.given_name,
+                'familyName' : payload.family_name
+            });
         }
-        res.cookie('session-token',token);
+        const accessToken  = jwt.sign({email:payload.email} , process.env.ACCESS_TOKEN_SECRET , {expiresIn:"15m"} );
+        const refreshToken = jwt.sign({email:payload.email} , process.env.REFRESH_TOKEN_SECRET );
+        res.cookie( "accessToken" , accessToken  , { path:"/" ,  httpOnly:true , maxAge: 900000 } );
+        res.cookie( "refreshToken", refreshToken , { path:"/" ,  httpOnly:true } ); 
         res.send('success');
-    } catch (e){ res.status(500).send(e) }    
+    } catch (e){ res.status(500).send(e); }    
 });
 
 module.exports = router;
