@@ -1,7 +1,7 @@
-// const mongoose = require("mongoose");
+const mongoose = require("mongoose");
 
 const { users, activeUsers } = require('../database/database');
-// const { watchingSchema } = require('../database/watching-schema');
+const { activitySchema } = require('../database/activity-schema');
 
 const disconnect = async ({ socket }) => {
     try {
@@ -26,6 +26,11 @@ const disconnect = async ({ socket }) => {
                 socket.broadcast.to(item.socketId).emit('he-is-offline', { lastSeen });
             });
         }
+        
+        // updating my activity
+        const myActivityDB = new mongoose.model(`activity${id}`, activitySchema, `activity${id}`);
+        await myActivityDB({ 'time': new Date().toGMTString() , 'description': `Offline`  }).save();
+
     } catch (e){ console.log(e); }
 }
 

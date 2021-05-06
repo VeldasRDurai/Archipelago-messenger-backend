@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const { users, activeUsers } = require('../database/database');
 const { chatSchema } = require('../database/chat-schema');
 const { historySchema } = require('../database/history-schema');
+const { activitySchema } = require('../database/activity-schema');
 
 const sendMessage = async ({ data, socket }) => {
     try {
@@ -48,12 +49,12 @@ const sendMessage = async ({ data, socket }) => {
             // he is online
             if(activeUser.some( item => item.isChatting && item.chattingWithEmail === email )){
                 const ack7 = await chatDB.updateMany({'sendBy':email, 'delivered':false}, // he is chatting with me
-                    {'delivered':true,'readed':true});
+                    {'delivered':true, 'deliveredTime':currentTime, 'readed':true, 'readedTime':currentTime });
                 const ack8 = await myHistoryDB.updateOne({'email':chattingWithEmail},{'lastDelivered':true, 'lastReaded':true});
                 const ack9 = await hisHistoryDB.updateOne({'email':email},{'lastDelivered':true, 'lastReaded':true, 'unRead':0 });
             } else {
                 const ack10 = await chatDB.updateMany({'sendBy':email, 'delivered':false}, // he not chatting with me
-                    {'delivered':true});
+                    {'delivered':true, 'deliveredTime':currentTime });
                 const ack8 = await myHistoryDB.updateOne({'email':chattingWithEmail},{'lastDelivered':true});
                 const ack9 = await hisHistoryDB.updateOne({'email':email},{'lastDelivered':true });                
             }
@@ -74,6 +75,11 @@ const sendMessage = async ({ data, socket }) => {
         
         const oldChat = await chatDB.find();       // our chat with updated status 
         socket.emit('previous-message',{ oldChat });        
+
+        // updating my activity
+        const myActivityDB = new mongoose.model(`activity${_id}`, activitySchema, `activity${_id}`);
+        await myActivityDB({ 'time': new Date().toGMTString() , 'description': `Sended a message to ${chattingWithEmail}`  }).save();
+
     } catch (e) {
         console.log(e);
       }

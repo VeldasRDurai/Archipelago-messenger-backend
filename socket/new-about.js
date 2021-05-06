@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 
 const { users, activeUsers } = require('../database/database');
 const { historySchema } = require('../database/history-schema');
+const { activitySchema } = require('../database/activity-schema');
 
 const newAbout = async ({ data, socket }) => {
     try {
@@ -41,6 +42,10 @@ const newAbout = async ({ data, socket }) => {
         // activeUser.forEach( item => {
         //     socket.broadcast.to(item.socketId).emit('updated-chattingWithEmail', { newAbout });
         // });
+
+        // updating my activity
+        const myActivityDB = new mongoose.model(`activity${_id}`, activitySchema, `activity${_id}`);
+        await myActivityDB({ 'time': new Date().toGMTString() , 'description': `Changed about to ${ newAbout }`  }).save();
         
     } catch (e){ console.log(e); }
 }

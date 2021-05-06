@@ -3,13 +3,14 @@ const mongoose = require("mongoose");
 const { users, activeUsers } = require('../database/database');
 const { historySchema } = require('../database/history-schema');
 const { chatSchema } = require('../database/chat-schema');
-// const { activitySchema } = require('../database/activity-schema');
+const { activitySchema } = require('../database/activity-schema');
 
 const newUser = async ({ data, socket }) => {
   try {
     console.log(data);
     const { email, name, _id } = data;
     console.log('my _id : ' , _id);
+    const currentTime = new Date();
     const myHistoryDB = new mongoose.model(`history${_id}`, historySchema, `history${_id}`);
     
     // changing the not sented messages to delivered status in my history
@@ -47,7 +48,7 @@ const newUser = async ({ data, socket }) => {
 
       //changing his messages to delivered in common database collection
       const chatDB = new mongoose.model( `chats${sortedId[0]}chats${sortedId[1]}`, chatSchema,`chats${sortedId[0]}chats${sortedId[1]}` );
-      await chatDB.updateMany({'sendBy':item.email,'delivered':false}, {'delivered':true});
+      await chatDB.updateMany({'sendBy':item.email,'delivered':false}, {'delivered':true, 'deliveredTime':currentTime });
       
       //changing his history last message to delivered
       const hisHistoryDB = new mongoose.model(`history${item.id}`, historySchema, `history${item.id}`);
@@ -67,8 +68,8 @@ const newUser = async ({ data, socket }) => {
     });
 
     // updating my activity
-    // const myActivityDB = new mongoose.model(`activity${_id}`, activitySchema, `activity${_id}`);
-    // await myActivityDB({ 'time': new Date(), 'activity':'You loged in' }).save();
+    const myActivityDB = new mongoose.model(`activity${_id}`, activitySchema, `activity${_id}`);
+    await myActivityDB({'time': new Date().toGMTString() , 'description':'online' }).save();
   
   } catch (e) { console.log(e); }
 }
