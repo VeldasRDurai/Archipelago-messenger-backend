@@ -17,7 +17,8 @@ app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(cors( { origin : "http://localhost:3000" , credentials : true } )); 
+app.use(cors( { origin : "https://archipelago-messenger.herokuapp.com/" , credentials : true } )); 
+
 
 const indexRouter = require('./routes/index');
 const signInRouter = require('./routes/sign-in');
