@@ -58,7 +58,7 @@ const sendMessage = async ({ data, socket }) => {
                 const ack8 = await myHistoryDB.updateOne({'email':chattingWithEmail},{'lastDelivered':true});
                 const ack9 = await hisHistoryDB.updateOne({'email':email},{'lastDelivered':true });                
             }
-            const oldChat = await chatDB.find();       // our chat with updated status 
+            const oldChat = await chatDB.find().sort({ _id: -1 }).limit(1000);       // our chat with updated status 
             const history = await hisHistoryDB.find(); // his changed history   
             activeUser.forEach( async (item) => {
                 if (item.isChatting && item.chattingWithEmail === email){ 
@@ -73,7 +73,7 @@ const sendMessage = async ({ data, socket }) => {
             });
         }
         
-        const oldChat = await chatDB.find();       // our chat with updated status 
+        const oldChat = await chatDB.find().sort({ _id: -1 }).limit(1000);       // our chat with updated status 
         socket.emit('previous-message',{ oldChat });        
 
         // updating my activity

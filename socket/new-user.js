@@ -54,7 +54,7 @@ const newUser = async ({ data, socket }) => {
       const hisHistoryDB = new mongoose.model(`history${item.id}`, historySchema, `history${item.id}`);
       await hisHistoryDB.updateOne({'email':email}, {lastDelivered: true });
       
-      const oldChat = await chatDB.find();
+      const oldChat = await chatDB.find().sort({ _id: -1 }).limit(1000);
       const history = await hisHistoryDB.find();      
       const activeUser = await activeUsers.find({ 'email':item.email });
       activeUser.forEach( item2 => {

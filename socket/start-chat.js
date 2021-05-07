@@ -31,7 +31,7 @@ const startChat = async ({ data, socket }) => {
       {'lastReaded': true });
     console.log('changed his history lastReaded to true', ack3);
 
-    const oldChat = await chatDB.find();       // our changed chat
+    const oldChat = await chatDB.find().sort({ _id: -1 }).limit(1000);       // our changed chat
     const history = await hisHistoryDB.find(); // his changed history   
     socket.emit('previous-message',{ oldChat });
     const activeUser = await activeUsers.find({ 'email':chattingWithEmail });
