@@ -30,10 +30,13 @@ router.post( '/', async (req, res, next) => {
         }
         const accessToken  = jwt.sign({email:payload.email} , process.env.ACCESS_TOKEN_SECRET , {expiresIn:"15m"} );
         const refreshToken = jwt.sign({email:payload.email} , process.env.REFRESH_TOKEN_SECRET );
-        res.cookie( "accessToken" , accessToken  , { path:"/" ,  httpOnly:true , maxAge: 900000, sameSite:"none", secure:true } );
-        res.cookie( "refreshToken", refreshToken , { path:"/" ,  httpOnly:true , sameSite:"none", secure:true } ); 
+        res.cookie( "accessToken" , accessToken  , { path:"/" ,  httpOnly:true , maxAge: 900000, sameSite:false, secure:true } );
+        res.cookie( "refreshToken", refreshToken , { path:"/" ,  httpOnly:true , sameSite:false, secure:true } ); 
         res.send('success');
-    } catch (e){ res.status(500).send(e); }    
+    } catch (e){ 
+        console.log(e);
+        res.status(500).send(e); 
+    }    
 });
 
 module.exports = router;
