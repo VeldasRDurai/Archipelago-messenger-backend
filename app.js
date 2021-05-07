@@ -6,6 +6,8 @@ const logger = require('morgan');
 const cors = require('cors');
 const http = require('http');
 const socketio = require('socket.io');
+const { shouldSendSameSiteNone } = require('should-send-same-site-none');
+
 
 const app = express();
 const server = http.createServer(app);
@@ -18,7 +20,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(cors( { origin : "https://archipelago-messenger.herokuapp.com" , credentials : true } )); 
-
+app.use(shouldSendSameSiteNone);
 
 const indexRouter = require('./routes/index');
 const signInRouter = require('./routes/sign-in');
