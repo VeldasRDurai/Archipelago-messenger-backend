@@ -63,12 +63,11 @@ const sendMessage = async ({ data, socket }) => {
             activeUser.forEach( async (item) => {
                 if (item.isChatting && item.chattingWithEmail === email){ 
                     // finding weather he is chatting with me
-                    // console.log(item.chattingWithEmail === email);
                     socket.broadcast.to(item.socketId).emit('previous-message', { oldChat });
                 } else {
                     //finding weather he is online
-                    // console.log(item.chattingWithEmail === email);
                     socket.broadcast.to(item.socketId).emit('set-history', { history });
+                    socket.broadcast.to(item.socketId).emit('push-notification', { notifyEmail:email, notifyName:name, notifyMessage:message });
                 } 
             });
         }
