@@ -25,13 +25,16 @@ app.use(shouldSendSameSiteNone);
 const indexRouter = require('./routes/index');
 const signInRouter = require('./routes/sign-in');
 const logOutRouter = require('./routes/log-out');
+const downloadHistory = require('./routes/download-history');
 
+app.use('/download-history',express.static(path.join(__dirname, 'public')));
 app.use('/log-out',express.static(path.join(__dirname, 'public')));
 app.use('/sign-in',express.static(path.join(__dirname, 'public')));
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/log-out',logOutRouter);
-app.use('/sign-in',signInRouter);
+app.use('/download-history', downloadHistory );
+app.use('/log-out', logOutRouter);
+app.use('/sign-in', signInRouter);
 app.use('/', indexRouter);
 
 // catch 404 and forward to error handler
