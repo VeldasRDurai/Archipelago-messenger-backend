@@ -8,7 +8,7 @@ const { activitySchema } = require('../database/activity-schema');
 const newUser = async ({ data, socket }) => {
   try {
     console.log(data);
-    const { email, name, _id } = data;
+    const { email, name, _id, subscription } = data;
     console.log('my _id : ' , _id);
     const currentTime = new Date();
     const myHistoryDB = new mongoose.model(`history${_id}`, historySchema, `history${_id}`);
@@ -39,7 +39,7 @@ const newUser = async ({ data, socket }) => {
     }
     
     // adding me to list of active users
-    const ack1 = await activeUsers({ 'email':email, 'name':name, 'id':_id, 'socketId':socket.id }).save();
+    const ack1 = await activeUsers({ 'email':email, 'name':name, 'id':_id, 'socketId':socket.id, 'subscription':subscription }).save();
     console.log('Added to active user : ', ack1); 
     
     const historyUsers = await myHistoryDB.find({'unRead': { $ne:0 } });
