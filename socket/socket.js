@@ -1,4 +1,3 @@
-
 const { newUser } =     require('./new-user');
 const { startChat } =   require('./start-chat');
 const { sendMessage } = require('./send-message');
@@ -18,12 +17,14 @@ module.exports = (io) => {
       socket.on('start-chat', data => startChat({ data, socket }) );
       socket.on('send-message', data => sendMessage({ data, socket }) );
       socket.on('end-chat', data => endChat({ data, socket }) ); 
-      socket.on( 'disconnect' , () => disconnect({ socket }) );
+      socket.on('disconnect' , () => disconnect({ socket }) );
 
       socket.on('search', data => search({ data, socket }) );
       socket.on('typing', data => typing({ data, socket }) );
       socket.on('new-about', data => newAbout({ data, socket }) );
       socket.on('get-history', data => getHistory({ data, socket }) );
+      socket.on('online', data => newUser({ data, socket }) );
+      socket.on('offline', () => disconnect({ socket }) );
     });
 }
 // const socketProvider = (io) => {

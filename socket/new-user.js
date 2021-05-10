@@ -8,7 +8,7 @@ const { activitySchema } = require('../database/activity-schema');
 const newUser = async ({ data, socket }) => {
   try {
     console.log(data);
-    const { email, name, _id, subscription } = data;
+    const { email, name, _id } = data;
     console.log('my _id : ' , _id);
     const currentTime = new Date();
     const myHistoryDB = new mongoose.model(`history${_id}`, historySchema, `history${_id}`);
@@ -21,9 +21,10 @@ const newUser = async ({ data, socket }) => {
     const history = await myHistoryDB.find();
     socket.emit('set-history', { history });
 
-    // changing my status to online
-    const ack2 = await users.updateOne({'email': email },{ 'online':true });
-    console.log('Become online : ', ack2);
+    // --**unnecessary
+    // changing my status to online 
+    // const ack2 = await users.updateOne({'email': email },{ 'online':true });
+    // console.log('Become online : ', ack2);
 
     const activeUser = await activeUsers.find({ 'email':email });
     // if no of active users in my name is zero 

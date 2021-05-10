@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const Schema = mongoose.Schema;
+// const Schema = mongoose.Schema;
 
 const activeUsersSchema = new mongoose.Schema({
     email : { type : String ,  required: [ true , " No email specified...!"  ] },

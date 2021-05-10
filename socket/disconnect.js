@@ -6,7 +6,7 @@ const { activitySchema } = require('../database/activity-schema');
 const disconnect = async ({ socket }) => {
     try {
         const details = await activeUsers.findOne({'socketId':socket.id});
-        const { email, name, id } = details;
+        const { email, name, id, chattingWithEmail } = details;
         console.log( email, name, '\nuser disconnected : ' , socket.id );
         const lastSeen = new Date();
 
@@ -27,6 +27,11 @@ const disconnect = async ({ socket }) => {
             });
         }
         
+        const partner = await activeUsers.find({ 'email':chattingWithEmail, 'chattingWithEmail':email });
+        partner.forEach( item => 
+            socket.broadcast.to(item.socketId).emit('toggle-typing', { isTyping:false }) 
+        );
+
         // updating my activity
         const myActivityDB = new mongoose.model(`activity${id}`, activitySchema, `activity${id}`);
         await myActivityDB({ 'time': new Date().toGMTString() , 'description': `Offline`  }).save();
