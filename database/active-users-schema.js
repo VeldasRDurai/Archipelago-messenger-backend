@@ -6,7 +6,7 @@ const activeUsersSchema = new mongoose.Schema({
     name : { type : String ,  required: [ true , " No name specified...!"  ] },
     id : { type : String ,  required: [ true , " No id specified...!"  ] },
     socketId : { type : String, required: [ true , " No socket id specified...!"  ] },
-    subscription : { type : Schema.Types.Mixed }, 
+    // subscription : { type : Schema.Types.Mixed }, 
     isChatting : { type : Boolean, default:false },
     chattingWithEmail : { type : String },
     chattingWithName : { type : String },

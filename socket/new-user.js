@@ -39,7 +39,8 @@ const newUser = async ({ data, socket }) => {
     }
     
     // adding me to list of active users
-    const ack1 = await activeUsers({ 'email':email, 'name':name, 'id':_id, 'socketId':socket.id, 'subscription':subscription }).save();
+    // const ack1 = await activeUsers({ 'email':email, 'name':name, 'id':_id, 'socketId':socket.id, 'subscription':subscription }).save();
+    const ack1 = await activeUsers({ 'email':email, 'name':name, 'id':_id, 'socketId':socket.id }).save();
     console.log('Added to active user : ', ack1); 
     
     const historyUsers = await myHistoryDB.find({'unRead': { $ne:0 } });

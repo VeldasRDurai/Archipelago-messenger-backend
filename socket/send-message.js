@@ -1,17 +1,17 @@
 const mongoose = require("mongoose");
-const push = require('web-push');
+// const push = require('web-push');
 
 const { users, activeUsers } = require('../database/database');
 const { chatSchema } = require('../database/chat-schema');
 const { historySchema } = require('../database/history-schema');
 const { activitySchema } = require('../database/activity-schema');
 
-const vapidkeys = {
-    publicKey:'BPTusE7P8UdeFusBo-HAkYSKag0S5cNa1xjGfwmho0mlmSx_ZFj0aoHGKouP0ONYWxAK8cfeYhe5wsQucSPbO9U',
-    privateKey:'DZjYA5kn9BCp27MgcpQpS18jBd2P7nWeFPq_4wMWY4g'
-};
+// const vapidkeys = {
+//     publicKey:'BPTusE7P8UdeFusBo-HAkYSKag0S5cNa1xjGfwmho0mlmSx_ZFj0aoHGKouP0ONYWxAK8cfeYhe5wsQucSPbO9U',
+//     privateKey:'DZjYA5kn9BCp27MgcpQpS18jBd2P7nWeFPq_4wMWY4g'
+// };
 
-push.setVapidDetails('mailto:veldasrdurai72@gmail.com', vapidkeys.publicKey, vapidkeys.privateKey );
+// push.setVapidDetails('mailto:veldasrdurai72@gmail.com', vapidkeys.publicKey, vapidkeys.privateKey );
 
 const sendMessage = async ({ data, socket }) => {
     try {
@@ -76,11 +76,11 @@ const sendMessage = async ({ data, socket }) => {
                     //finding weather he is online
                     socket.broadcast.to(item.socketId).emit('set-history', { history });
                     // socket.broadcast.to(item.socketId).emit('push-notification', { notifyEmail:email, notifyName:name, notifyMessage:message });
-                    const subscriper = await activeUsers.find({ 'socketId': item.socketId });
-                    if( subscriper.subscription ){
-                        console.log('server send notification')
-                        push.sendNotification(subscription,'test message');
-                    }
+                    // const subscriper = await activeUsers.find({ 'socketId': item.socketId });
+                    // if( subscriper.subscription ){
+                    //     console.log('server send notification')
+                    //     push.sendNotification(subscription,'test message');
+                    // }
                 } 
             });
         }
