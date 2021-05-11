@@ -6,6 +6,8 @@ const { chatSchema } = require('../database/chat-schema');
 const { historySchema } = require('../database/history-schema');
 const { activitySchema } = require('../database/activity-schema');
 
+const { pushNotification } = require('./push-notification');
+
 // const vapidkeys = {
 //     publicKey:'BPTusE7P8UdeFusBo-HAkYSKag0S5cNa1xjGfwmho0mlmSx_ZFj0aoHGKouP0ONYWxAK8cfeYhe5wsQucSPbO9U',
 //     privateKey:'DZjYA5kn9BCp27MgcpQpS18jBd2P7nWeFPq_4wMWY4g'
@@ -17,7 +19,7 @@ const sendMessage = async ({ data, socket }) => {
     try {
         console.log('send message');
         // console.log(data);
-        const { email, name, _id, chattingWithEmail, chattingWithName, chattingWithId, message } = data;
+        const { email, name, _id, picture, chattingWithEmail, chattingWithName, chattingWithId, message } = data;
         const currentTime = new Date();
 
         // adding new message to database with read and delivered none
@@ -85,6 +87,8 @@ const sendMessage = async ({ data, socket }) => {
             });
         }
         
+        pushNotification({ email, name, picture, message, chattingWithEmail });
+
         const oldChat = await chatDB.find().sort({ _id: -1 }).limit(1000);       // our chat with updated status 
         socket.emit('previous-message',{ oldChat });        
 

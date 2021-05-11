@@ -26,16 +26,22 @@ const indexRouter = require('./routes/index');
 const signInRouter = require('./routes/sign-in');
 const logOutRouter = require('./routes/log-out');
 const downloadHistory = require('./routes/download-history');
+const subscriptionRouter = require('./routes/subsciption');
+const unsubscriptionRouter = require('./routes/unsubscription');
 
+app.use('/unsubscribe',express.static(path.join(__dirname, 'public')));
+app.use('/subscribe',express.static(path.join(__dirname, 'public')));
 app.use('/download-history',express.static(path.join(__dirname, 'public')));
 app.use('/log-out',express.static(path.join(__dirname, 'public')));
 app.use('/sign-in',express.static(path.join(__dirname, 'public')));
 app.use(express.static(path.join(__dirname, 'public')));
 
+app.use('/unsubscribe', unsubscriptionRouter );
+app.use('/subscribe', subscriptionRouter );
 app.use('/download-history', downloadHistory );
-app.use('/log-out', logOutRouter);
-app.use('/sign-in', signInRouter);
-app.use('/', indexRouter);
+app.use('/log-out', logOutRouter );
+app.use('/sign-in', signInRouter );
+app.use('/', indexRouter );
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
