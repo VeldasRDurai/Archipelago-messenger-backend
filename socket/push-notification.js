@@ -6,7 +6,7 @@ const { subscriptions } = require('../database/database');
 
 const pushNotification = ({ email, name, picture, message, chattingWithEmail }) => {
     const payload = {
-        title: `You have new message from ${ email }`,
+        title: `New message from ${ email }`,
         message: `${name} : ${message}` ,
         url: 'https://archipelago-messenger.herokuapp.com/',
         ttl: 36000,
