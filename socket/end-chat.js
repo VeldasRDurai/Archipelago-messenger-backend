@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 
 const { activeUsers } = require('../database/database');
-const { activitySchema } = require('../database/activity-schema');
+// const { activitySchema } = require('../database/activity-schema');
 
 const endChat = async ({ data, socket }) => {
     try {
@@ -10,8 +10,8 @@ const endChat = async ({ data, socket }) => {
             { 'isChatting':false, 'chattingWithEmail':undefined, 'chattingWithName':undefined, 'chattingWithId':undefined });
         
         // updating my activity
-        const myActivityDB = new mongoose.model(`activity${_id}`, activitySchema, `activity${_id}`);
-        await myActivityDB({ 'time': new Date().toGMTString() , 'description': `Stoped chatting with ${chattingWithEmail}`  }).save();
+        // const myActivityDB = new mongoose.model(`activity${_id}`, activitySchema, `activity${_id}`);
+        // await myActivityDB({ 'time': new Date().toGMTString() , 'description': `Stoped chatting with ${chattingWithEmail}`  }).save();
     } catch (e){ console.log(e); }
 }
 

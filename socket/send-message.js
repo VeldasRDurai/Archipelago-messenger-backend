@@ -80,8 +80,8 @@ const sendMessage = async ({ data, socket }) => {
         socket.emit('previous-message',{ oldChat });        
 
         // updating my activity
-        const myActivityDB = new mongoose.model(`activity${_id}`, activitySchema, `activity${_id}`);
-        await myActivityDB({ 'time': new Date().toGMTString() , 'description': `Sended a message to ${chattingWithEmail}`  }).save();
+        // const myActivityDB = new mongoose.model(`activity${_id}`, activitySchema, `activity${_id}`);
+        // await myActivityDB({ 'time': new Date().toGMTString() , 'description': `Sended a message to ${chattingWithEmail}`  }).save();
 
     } catch (e) {
         console.log(e);

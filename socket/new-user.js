@@ -63,15 +63,16 @@ const newUser = async ({ data, socket }) => {
         if (item2.isChatting && item2.chattingWithEmail === email){ 
           // finding weather he is chatting with me
           socket.broadcast.to(item2.socketId).emit('previous-message', { oldChat });
-        } 
+        } else{ 
           //finding weather he is online
           socket.broadcast.to(item2.socketId).emit('set-history', { history });
+        }
       });
     });
 
     // updating my activity
-    const myActivityDB = new mongoose.model(`activity${_id}`, activitySchema, `activity${_id}`);
-    await myActivityDB({'time': new Date().toGMTString() , 'description':'online' }).save();
+    // const myActivityDB = new mongoose.model(`activity${_id}`, activitySchema, `activity${_id}`);
+    // await myActivityDB({'time': new Date().toGMTString() , 'description':'online' }).save();
   
   } catch (e) { console.log(e); }
 }

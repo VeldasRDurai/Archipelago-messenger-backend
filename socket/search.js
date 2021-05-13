@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 
 const { users } = require('../database/database');
-const { activitySchema } = require('../database/activity-schema');
+// const { activitySchema } = require('../database/activity-schema');
 
 const search = async ({ data, socket }) => {
   try{
@@ -13,8 +13,8 @@ const search = async ({ data, socket }) => {
       socket.emit('search-result' , userlist);
       
       // updating my activity
-      const myActivityDB = new mongoose.model(`activity${_id}`, activitySchema, `activity${_id}`);
-      await myActivityDB({ 'time': new Date().toGMTString() , 'description': `Searched for ${ searchText }`  }).save();
+      // const myActivityDB = new mongoose.model(`activity${_id}`, activitySchema, `activity${_id}`);
+      // await myActivityDB({ 'time': new Date().toGMTString() , 'description': `Searched for ${ searchText }`  }).save();
 
     } catch(e){ console.log(e); }
 }

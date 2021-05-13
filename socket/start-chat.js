@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const { users, activeUsers } = require('../database/database');
 const { chatSchema } = require('../database/chat-schema');
 const { historySchema } = require('../database/history-schema');
-const { activitySchema } = require('../database/activity-schema');
+// const { activitySchema } = require('../database/activity-schema');
 
 const startChat = async ({ data, socket }) => {
   try {
@@ -66,8 +66,8 @@ const startChat = async ({ data, socket }) => {
     console.log('changing my active user details', ack4 );
 
     // updating my activity
-    const myActivityDB = new mongoose.model(`activity${_id}`, activitySchema, `activity${_id}`);
-    await myActivityDB({ 'time': new Date().toGMTString() , 'description': `Started chatting with ${chattingWithEmail}`  }).save();
+    // const myActivityDB = new mongoose.model(`activity${_id}`, activitySchema, `activity${_id}`);
+    // await myActivityDB({ 'time': new Date().toGMTString() , 'description': `Started chatting with ${chattingWithEmail}`  }).save();
     
   } catch(e){
     console.log(e);
